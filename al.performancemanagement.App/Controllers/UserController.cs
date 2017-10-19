@@ -10,6 +10,7 @@ using System.Net;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
+using System.Web.Http.OData.Query;
 
 namespace al.performancemanagement.App.Controllers
 {
@@ -35,6 +36,15 @@ namespace al.performancemanagement.App.Controllers
         public async Task<Result<UserLogin>> CreateUser([FromBody]UserInfo request)
         {
             return await _bo.CreateUser(new Request<UserInfo>(request));
+        }
+
+        [HttpGet]
+        [Route("api/users")]
+        public async Task<SearchResult<UserInfo>> Search(ODataQueryOptions<UserInfo> queryOptions)
+        {
+            var request = new ConvertSearchRequest<UserInfo, UserInfo>().ConvertToSearchRequest<UserInfo>(queryOptions);
+
+            return await _bo.Search(null);
         }
     }    
 }

@@ -115,7 +115,14 @@ namespace al.performancemanagement.BOL.BO
                 if (searchRes.SearchTotal <= 0)
                     return new SearchResult<EmployeeReview>("No record found");
 
-                result.Items = Mapper.Map<IQueryable<EmployeeReview>>(searchRes.Items);
+                List<EmployeeReview> list = new List<EmployeeReview>();
+
+                foreach(var item in searchRes.Items)
+                {
+                    list.Add(Mapper.Map<EmployeeReview>(item));
+                }
+
+                result.Items = list.AsQueryable<EmployeeReview>();
                 result.SearchTotal = searchRes.SearchTotal;
                 result.SearchPages = searchRes.SearchPages;
                 result.Successful = true;
@@ -271,6 +278,39 @@ namespace al.performancemanagement.BOL.BO
             catch(Exception e)
             {
                 return new Result<EmployeeReview>(e.Message);
+            }
+        }
+
+        public async Task<SearchResult<EmployeeReview>> SearchByEmployee(Request<long> id)
+        {
+            var result = new SearchResult<EmployeeReview>();
+            try
+            {
+                var searchRes = _repo.Search(new SearchRequest<EmployeeReviewData>() {
+                    Filter = f=>f.EmployeeId ==id.Model || f.SupervisorId == id.Model
+                });
+
+                if (searchRes.SearchTotal <= 0)
+                    return new SearchResult<EmployeeReview>("No record found");
+
+                List<EmployeeReview> list = new List<EmployeeReview>();
+
+                foreach (var item in searchRes.Items)
+                {
+                    list.Add(Mapper.Map<EmployeeReview>(item));
+                }
+
+                result.Items = list.AsQueryable<EmployeeReview>();
+                result.SearchTotal = searchRes.SearchTotal;
+                result.SearchPages = searchRes.SearchPages;
+                result.Successful = true;
+                result.Message = "Successfully retrieve records";
+
+                return result;
+            }
+            catch(Exception e)
+            {
+                return new SearchResult<EmployeeReview>(e.Message);
             }
         }
     }

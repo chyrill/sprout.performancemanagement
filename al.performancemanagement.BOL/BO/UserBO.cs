@@ -4,6 +4,7 @@ using al.performancemanagement.DAL.Models;
 using al.performancemanagement.DAL.Repository;
 using AutoMapper;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -37,6 +38,8 @@ namespace al.performancemanagement.BOL.BO
 
                 if (searchUser.SearchTotal > 0)
                     return new Result<UserLogin>("User is already have a record");
+
+                request.Model.DateCreated = DateTime.Now;
 
                 var data = Mapper.Map<UserInfoData>(request.Model);
 
@@ -127,6 +130,41 @@ namespace al.performancemanagement.BOL.BO
             catch (Exception e)
             {
                 return new Result<UserLogin>(e.Message) { ResultCode = ErrorCodes.Exception_Error };
+            }
+        }
+
+        public async Task<SearchResult<UserInfo>> Search(SearchRequest<UserInfo> request)
+        {
+            var result = new SearchResult<UserInfo>();
+            try
+            {
+                var dataSearchRequest = new SearchRequest<UserInfoData>();
+
+                new ConvertSearchRequest<UserInfoData, UserInfo>().ConvertToDataSearchRequest(dataSearchRequest, request);
+
+                var searchRes = new UserInfoDataRepository().Search(dataSearchRequest);
+
+                if (searchRes.SearchTotal <= 0)
+                    return new SearchResult<UserInfo>("No record found");
+
+                List<UserInfo> list = new List<UserInfo>();
+
+                foreach (var item in searchRes.Items)
+                {
+                    list.Add(Mapper.Map<UserInfo>(item));
+                }
+
+                result.Items = list.AsQueryable<UserInfo>();
+                result.SearchTotal = searchRes.SearchTotal;
+                result.SearchPages = searchRes.SearchPages;
+                result.Successful = true;
+                result.Message = "Successfully retrieve records";
+
+                return result;
+            }
+            catch (Exception e)
+            {
+                return new SearchResult<UserInfo>(e.Message);
             }
         }
 

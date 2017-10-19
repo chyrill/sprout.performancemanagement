@@ -5,6 +5,7 @@ using al.performancemanagement.DAL.Repository;
 using AutoMapper;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -133,7 +134,14 @@ namespace al.performancemanagement.BOL.BO
                 if (searchRes.SearchTotal <= 0)
                     return new SearchResult<ReviewTemplate>("no record found");
 
-                result.Items = Mapper.Map<IQueryable<ReviewTemplate>>(searchRes.Items);
+                List<ReviewTemplate> data = new List<ReviewTemplate>();
+
+                foreach(var item in searchRes.Items)
+                {
+                    data.Add(Mapper.Map<ReviewTemplate>(item));
+                }
+
+                result.Items = data.AsQueryable<ReviewTemplate>();
                 result.Message = "Successfully retrieve data";
                 result.Successful = true;
                 result.SearchTotal = searchRes.SearchTotal;
@@ -167,7 +175,7 @@ namespace al.performancemanagement.BOL.BO
                 var div = points / 5;
 
                 int cnt = 1;
-                for(decimal i = 0; i <= points;)
+                for(decimal i = 0; i < points;)
                 {
                     Rating data = new Rating() {
                         RangeFrom = i,

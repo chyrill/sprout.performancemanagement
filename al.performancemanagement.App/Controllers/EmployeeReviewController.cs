@@ -48,5 +48,12 @@ namespace al.performancemanagement.App.Controllers
         {
             return await _bo.Answer(new Request<EmployeeReview>(data));
         }
+
+        [Route("api/employeereview/{empId}")]
+        [HttpGet]
+        public async Task<Result<EmployeeReview>> GetByEmpId([FromUri]long id)
+        {
+            
+        }
     }
 }

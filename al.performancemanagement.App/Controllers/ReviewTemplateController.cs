@@ -39,7 +39,7 @@ namespace al.performancemanagement.App.Controllers
         {
             var request = new ConvertSearchRequest<ReviewTemplate, ReviewTemplate>().ConvertToSearchRequest<ReviewTemplate>(queryOptions);
 
-            return await _bo.Search(request);
+            return await _bo.Search(null);
         }
     }
 }
