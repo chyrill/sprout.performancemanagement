@@ -6,6 +6,7 @@ using al.performancemanagement.DAL.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
@@ -24,7 +25,16 @@ namespace al.performancemanagement.App.Controllers
             data.Username = request.Username;
             data.Password = request.Password;
 
-            return await _bo.Login(new Request<UserLogin>(data));
+            var result =  await _bo.Login(new Request<UserLogin>(data));
+
+            return result;
+        }
+
+        [HttpPost]
+        [Route("api/user")]
+        public async Task<Result<UserLogin>> CreateUser([FromBody]UserInfo request)
+        {
+            return await _bo.CreateUser(new Request<UserInfo>(request));
         }
     }    
 }

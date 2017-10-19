@@ -36,7 +36,7 @@ namespace al.performancemanagement.DAL.Repository
                 }
 
                 string sp = "sp_" + _repoName + "_add";
-                var create = this._db.Query<long>(sp, param, commandType: CommandType.StoredProcedure).Single();
+                var create = this._db.Execute(sp, param, commandType: CommandType.StoredProcedure);
 
                 _db.Close();
 

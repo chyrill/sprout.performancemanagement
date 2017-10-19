@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
 using System.Web.Http;
+using System.Web.Http.Tracing;
 
 namespace al.performancemanagement.App
 {
@@ -12,7 +10,7 @@ namespace al.performancemanagement.App
         {
             // Web API configuration and services
 
-            // Web API routes
+          
             config.MapHttpAttributeRoutes();
 
             config.Routes.MapHttpRoute(
@@ -21,6 +19,10 @@ namespace al.performancemanagement.App
                 defaults: new { id = RouteParameter.Optional }
             );
 
+            config.EnableSystemDiagnosticsTracing();
+            config.Services.Replace(typeof(ITraceWriter), new WebApiTracer());
+            config.MessageHandlers.Add(new CorsHandler());
+            config.MessageHandlers.Add(new WebApiDelegatingHandler());
             config.Formatters.JsonFormatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue("text/html"));
         }
     }

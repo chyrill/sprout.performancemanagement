@@ -27,6 +27,10 @@ namespace al.performancemanagement.BOL
         {
             Mapper.CreateMap<UserLogin, UserLoginData>();
             Mapper.CreateMap<UserInfo, UserInfoData>();
+            Mapper.CreateMap<ReviewTemplate, ReviewTemplateData>();
+            Mapper.CreateMap<Rating, RatingData>();
+            Mapper.CreateMap<EmployeeReview, EmployeeReviewData>();
+            Mapper.CreateMap<AnswerItem, AnswerItemData>();
 
             DestinationSourceMappingLoaded = true;
         }
@@ -35,6 +39,10 @@ namespace al.performancemanagement.BOL
         {
             Mapper.CreateMap<UserLoginData, UserLogin>();
             Mapper.CreateMap<UserInfoData, UserInfo>();
+            Mapper.CreateMap<ReviewTemplateData, ReviewTemplate>();
+            Mapper.CreateMap<RatingData, Rating>();
+            Mapper.CreateMap<EmployeeReviewData, EmployeeReview>();
+            Mapper.CreateMap<AnswerItemData, AnswerItem>();
 
             SourceDestinationMappingLoaded = true;
         }

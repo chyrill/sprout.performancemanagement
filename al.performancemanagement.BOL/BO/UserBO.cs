@@ -85,21 +85,23 @@ namespace al.performancemanagement.BOL.BO
                     Filter = f => f.Username == request.Model.Username
                 });
 
+                if (searchUserLoginRes.SearchTotal <= 0)
+                    return new Result<UserLogin>("Invalid Credentials");
+
                 if (searchUserLoginRes.Items.FirstOrDefault().Attempt > 3)
                     return new Result<UserLogin>("Account is locked");
 
                 var userLoginData = searchUserLoginRes.Items.Where(x => x.Password == request.Model.Password);
 
-                if (userLoginData == null)
+                if (userLoginData.Count() <= 0)
                 {
                     var data = searchUserLoginRes.Items.FirstOrDefault();
                     data.Attempt++;
 
-                    if (data.Attempt > 3)
-                    {
-                        var updateUserLoginRes = new UserLoginDataRepository().Update(data);
+                    var updateUserLoginRes = new UserLoginDataRepository().Update(data);
+
+                    if(data.Attempt>3)
                         return new Result<UserLogin>("Account is locked");
-                    }
 
                     return new Result<UserLogin>("Invalid Username or password");
                 }
@@ -109,7 +111,7 @@ namespace al.performancemanagement.BOL.BO
 
                     data.Attempt = 0;
                     data.LastSuccessfulLogin = DateTime.Now;
-                    data.AuthCode = "at_" + new Guid().ToString();
+                    data.AuthCode = "at_" + RandomString().ToLower();
                     var updateUserLoginRes = new UserLoginDataRepository().Update(data);
 
                     var searchUserInfo = new UserInfoDataRepository().GetById(data.UserInfoId);
@@ -126,6 +128,14 @@ namespace al.performancemanagement.BOL.BO
             {
                 return new Result<UserLogin>(e.Message) { ResultCode = ErrorCodes.Exception_Error };
             }
+        }
+
+
+        public string RandomString()
+        {
+            Random rand = new Random();
+            const string chars = "ABCDEFGHIJKLMNOPQURSTUVWXYZ1234567890";
+            return new string(Enumerable.Repeat(chars, 26).Select(x => x[rand.Next(x.Length)]).ToArray());
         }
     }
 }
