@@ -49,11 +49,18 @@ namespace al.performancemanagement.App.Controllers
             return await _bo.Answer(new Request<EmployeeReview>(data));
         }
 
-        [Route("api/employeereview/{empId}")]
+        [Route("api/employeereview/answer/{empId}")]
         [HttpGet]
-        public async Task<Result<EmployeeReview>> GetByEmpId([FromUri]long id)
+        public async Task<SearchResult<EmployeeReview>> GetByEmpId([FromUri]long empid)
         {
-            
+            return await _bo.SearchByEmployee(new Request<long>(empid));
+        }
+
+        [Route("api/employeereview/getall/{empid}")]
+        [HttpGet]
+        public async Task<SearchResult<EmployeeReview>> SearchAllbyEmp([FromUri]long empid)
+        {
+            return await _bo.SearchAllByEmployee(new Request<long>(empid));
         }
     }
 }

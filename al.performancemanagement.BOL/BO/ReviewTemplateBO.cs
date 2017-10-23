@@ -183,8 +183,14 @@ namespace al.performancemanagement.BOL.BO
                     };
 
                     if (div <= 1)
-                        data.RangeTo = i + div - (decimal)0.01;
+                    {
+                        if (cnt == 5)
+                            data.RangeTo = points;
 
+                        else
+                            data.RangeTo = i + div - (decimal)0.01;
+                    }
+                        
                     else
                         data.RangeTo = i + div;
                     

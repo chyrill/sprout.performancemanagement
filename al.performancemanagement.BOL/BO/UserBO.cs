@@ -85,7 +85,7 @@ namespace al.performancemanagement.BOL.BO
 
                 var searchUserLoginRes = new UserLoginDataRepository().Search(new SearchRequest<UserLoginData>()
                 {
-                    Filter = f => f.Username == request.Model.Username
+                    Filter = f => f.Username == request.Model.Username && f.Password == request.Model.Password
                 });
 
                 if (searchUserLoginRes.SearchTotal <= 0)
@@ -94,37 +94,22 @@ namespace al.performancemanagement.BOL.BO
                 if (searchUserLoginRes.Items.FirstOrDefault().Attempt > 3)
                     return new Result<UserLogin>("Account is locked");
 
-                var userLoginData = searchUserLoginRes.Items.Where(x => x.Password == request.Model.Password);
+                var data = searchUserLoginRes.Items.FirstOrDefault();
 
-                if (userLoginData.Count() <= 0)
-                {
-                    var data = searchUserLoginRes.Items.FirstOrDefault();
-                    data.Attempt++;
+                data.AuthCode = "at_" + RandomString().ToLower();
 
-                    var updateUserLoginRes = new UserLoginDataRepository().Update(data);
+                data.LastSuccessfulLogin = DateTime.Now;
 
-                    if(data.Attempt>3)
-                        return new Result<UserLogin>("Account is locked");
 
-                    return new Result<UserLogin>("Invalid Username or password");
-                }
-                else
-                {
-                    var data = userLoginData.FirstOrDefault();
+                var updateUserLoginRes = new UserLoginDataRepository().Update(data);
 
-                    data.Attempt = 0;
-                    data.LastSuccessfulLogin = DateTime.Now;
-                    data.AuthCode = "at_" + RandomString().ToLower();
-                    var updateUserLoginRes = new UserLoginDataRepository().Update(data);
+                var searchUserInfo = new UserInfoDataRepository().GetById(data.UserInfoId);
 
-                    var searchUserInfo = new UserInfoDataRepository().GetById(data.UserInfoId);
+                UserLogin result = new UserLogin();
+                result = Mapper.Map<UserLogin>(data);
+                result.UserInfo = Mapper.Map<UserInfo>(searchUserInfo);
 
-                    UserLogin result = new UserLogin();
-                    result = Mapper.Map<UserLogin>(data);
-                    result.UserInfo = Mapper.Map<UserInfo>(searchUserInfo);
-
-                    return new Result<UserLogin>() { Successful = true, Message = "Successfully Logged In", Model = result };
-                }
+                return new Result<UserLogin>() { Successful = true, Message = "Successfully Logged In", Model = result };
 
             }
             catch (Exception e)

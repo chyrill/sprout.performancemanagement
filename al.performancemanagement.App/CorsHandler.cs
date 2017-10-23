@@ -49,15 +49,23 @@ namespace al.performancemanagement.App
                 {
                     return base.SendAsync(request, cancellationToken).ContinueWith<HttpResponseMessage>(t =>
                     {
-                        var data = t.Result.Content.ReadAsStringAsync();
-                        JObject result = JsonConvert.DeserializeObject<JObject>(data.Result);
-                        if (!(bool)result["Successful"])
+                        try
                         {
-                            t.Result.StatusCode = HttpStatusCode.BadRequest;
+                            var data = t.Result.Content.ReadAsStringAsync();
+                            JObject result = JsonConvert.DeserializeObject<JObject>(data.Result);
+                            if (!(bool)result["Successful"])
+                            {
+                                t.Result.StatusCode = HttpStatusCode.BadRequest;
+                            }
+                            HttpResponseMessage resp = t.Result;
+                            resp.Headers.Add(AccessControlAllowOrigin, request.Headers.GetValues(Origin).First());
+                            return resp;
                         }
-                        HttpResponseMessage resp = t.Result;
-                        resp.Headers.Add(AccessControlAllowOrigin, request.Headers.GetValues(Origin).First());
-                        return resp;
+                        catch(Exception e)
+                        {
+                            return null;
+                        }
+                      
                     });
                 }
             }

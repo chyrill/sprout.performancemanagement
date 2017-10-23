@@ -74,12 +74,18 @@ namespace al.performancemanagement.BOL.BO
         {
             try
             {
-                var searchData = _repo.GetById(id);
+                var searchData = _repo.GetById(id.Model);
 
                 if (searchData == null)
                     return new Result<EmployeeReview>("Record not found");
 
                 var result = Mapper.Map<EmployeeReview>(searchData);
+
+                var searchEmployee = new UserInfoDataRepository().GetById(result.EmployeeId);
+                var searchSupervisor = new UserInfoDataRepository().GetById(result.SupervisorId);
+
+                result.EmployeeName = searchEmployee.LastName + ", " + searchEmployee.FirstName;
+                result.SupervisorName = searchSupervisor.LastName + ", " + searchSupervisor.FirstName;
 
                 var searchAnswerItem = new AnswerItemDataRepository().Search(new SearchRequest<AnswerItemData>()
                 {
@@ -88,6 +94,19 @@ namespace al.performancemanagement.BOL.BO
 
                 List<AnswerItem> data = new List<AnswerItem>();
 
+                var searchRatingList = new RatingDataRepository().Search(new SearchRequest<RatingData>()
+                {
+                    Filter = f => f.ReviewTemplateId == result.ReviewTemplateId
+                });
+
+                List<Rating> ratingList = new List<Rating>();
+
+                foreach(var rating in searchRatingList.Items)
+                {
+                    ratingList.Add(Mapper.Map<Rating>(rating));
+                }
+
+                result.RatingArray = ratingList.OrderBy(x => x.RangeFrom).ToList();
                 data = Mapper.Map<List<AnswerItem>>(searchAnswerItem.Items.ToList());
 
                 result.AnswerScore = data;
@@ -108,7 +127,7 @@ namespace al.performancemanagement.BOL.BO
             {
                 var dataSearchRequest = new SearchRequest<EmployeeReviewData>();
 
-                new ConvertSearchRequest<EmployeeReviewData, EmployeeReview>().ConvertToDataSearchRequest(dataSearchRequest, request);
+                new ConvertSearchRequest<EmployeeReview, EmployeeReviewData>().ConvertToDataSearchRequest(request, dataSearchRequest);
 
                 var searchRes = _repo.Search(dataSearchRequest);
 
@@ -119,7 +138,17 @@ namespace al.performancemanagement.BOL.BO
 
                 foreach(var item in searchRes.Items)
                 {
-                    list.Add(Mapper.Map<EmployeeReview>(item));
+                    var itemdata = Mapper.Map<EmployeeReview>(item);
+
+                    var searchemployee = new UserInfoDataRepository().GetById(item.EmployeeId);
+
+                    itemdata.EmployeeName = searchemployee.LastName + ", " + searchemployee.FirstName;
+
+                    var searchSupervisor = new UserInfoDataRepository().GetById(item.SupervisorId);
+
+                    itemdata.SupervisorName = searchSupervisor.LastName + ", " + searchSupervisor.FirstName;
+
+                    list.Add(itemdata);
                 }
 
                 result.Items = list.AsQueryable<EmployeeReview>();
@@ -159,8 +188,12 @@ namespace al.performancemanagement.BOL.BO
                 {
                     AnswerItem item = new AnswerItem()
                     {
-                        EmployeeReviewId=id,
-                        Question = question
+                        EmployeeReviewId = id,
+                        Question = question,
+                        EmployeeRemark = null,
+                        EmployeeScore = 0,
+                        SupervisorRemark = null,
+                        SupervisorScore = 0
                     };
 
                     new AnswerItemDataRepository().Insert(Mapper.Map<AnswerItemData>(item));
@@ -217,7 +250,7 @@ namespace al.performancemanagement.BOL.BO
             try
             {
                 decimal ave = 0,total=0;
-                if(request.Model.Status == "Self Review")
+                if(request.Model.Status == "Employee Review")
                 {
                     int cnt = 1;
                     foreach(var item in request.Model.AnswerScore)
@@ -257,12 +290,9 @@ namespace al.performancemanagement.BOL.BO
 
                     request.Model.SupervisorAverageScore = ave;
 
-                    var getRating = new RatingDataRepository().Search(new SearchRequest<RatingData>()
-                    {
-                        Filter = f => f.RangeTo <= ave && f.RangeFrom >= ave
-                    });
+                    var getRatings = new RatingDataRepository().GetDescription(request.Model.ReviewTemplateId, ave);
 
-                    request.Model.Rating = getRating.Items.FirstOrDefault().Description;
+                    request.Model.Rating = getRatings.FirstOrDefault().Description;
                     request.Model.Status = "Reviewed";
 
                     var res = _repo.Update(Mapper.Map<EmployeeReviewData>(request.Model));
@@ -287,7 +317,7 @@ namespace al.performancemanagement.BOL.BO
             try
             {
                 var searchRes = _repo.Search(new SearchRequest<EmployeeReviewData>() {
-                    Filter = f=>f.EmployeeId ==id.Model || f.SupervisorId == id.Model
+                    Filter = f=>(f.EmployeeId ==id.Model && f.Status=="Employee Review" ) || (f.SupervisorId == id.Model &&f.Status=="Supervisor Review" )
                 });
 
                 if (searchRes.SearchTotal <= 0)
@@ -309,6 +339,50 @@ namespace al.performancemanagement.BOL.BO
                 return result;
             }
             catch(Exception e)
+            {
+                return new SearchResult<EmployeeReview>(e.Message);
+            }
+        }
+
+        public async Task<SearchResult<EmployeeReview>> SearchAllByEmployee(Request<long> id)
+        {
+            var result = new SearchResult<EmployeeReview>();
+            try
+            {
+                var searchRes = _repo.Search(new SearchRequest<EmployeeReviewData>()
+                {
+                    Filter = f => (f.EmployeeId == id.Model && (f.Status == "Employee Review" || f.Status == "Reviewed")) || (f.SupervisorId == id.Model && (f.Status == "Supervisor Review" || f.Status == "Reviewed"))
+                });
+
+                if (searchRes.SearchTotal <= 0)
+                    return new SearchResult<EmployeeReview>("No record found");
+
+                List<EmployeeReview> list = new List<EmployeeReview>();
+
+                foreach (var item in searchRes.Items)
+                {
+                    var itemdata = Mapper.Map<EmployeeReview>(item);
+
+                    var searchemployee = new UserInfoDataRepository().GetById(item.EmployeeId);
+
+                    itemdata.EmployeeName = searchemployee.LastName + ", " + searchemployee.FirstName;
+
+                    var searchSupervisor = new UserInfoDataRepository().GetById(item.SupervisorId);
+
+                    itemdata.SupervisorName = searchSupervisor.LastName + ", " + searchSupervisor.FirstName;
+
+                    list.Add(itemdata);
+                }
+
+                result.Items = list.AsQueryable<EmployeeReview>();
+                result.SearchTotal = searchRes.SearchTotal;
+                result.SearchPages = searchRes.SearchPages;
+                result.Successful = true;
+                result.Message = "Successfully retrieve records";
+
+                return result;
+            }
+            catch (Exception e)
             {
                 return new SearchResult<EmployeeReview>(e.Message);
             }

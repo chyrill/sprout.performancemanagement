@@ -80,6 +80,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="script.sql" />
+    <Content Include="sqlQueries.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\AutoMapper.3.3.0\tools\AutoMapper.targets" Condition="Exists('..\packages\AutoMapper.3.3.0\tools\AutoMapper.targets')" />

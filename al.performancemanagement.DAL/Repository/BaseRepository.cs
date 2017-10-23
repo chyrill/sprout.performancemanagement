@@ -44,6 +44,7 @@ namespace al.performancemanagement.DAL.Repository
             }
             catch (Exception e)
             {
+                _db.Close();
                 return false;
             }
         }
@@ -72,6 +73,7 @@ namespace al.performancemanagement.DAL.Repository
             }
             catch (Exception e)
             {
+                _db.Close();
                 return false;
             }
         }
@@ -93,6 +95,7 @@ namespace al.performancemanagement.DAL.Repository
             }
             catch(Exception e)
             {
+                _db.Close();
                 return false;
             }
         }
@@ -112,6 +115,7 @@ namespace al.performancemanagement.DAL.Repository
             }
             catch(Exception e)
             {
+                _db.Close();
                 return default(TData);
             }
         }
@@ -177,6 +181,7 @@ namespace al.performancemanagement.DAL.Repository
             }
             catch(Exception e)
             {
+                _db.Close();
                 return null;
             }
         }

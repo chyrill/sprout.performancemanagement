@@ -1,0 +1,296 @@
+CREATE TABLE [dbo].[AnswerItemData] (
+    [Id]               BIGINT          IDENTITY (1, 1) NOT NULL,
+    [EmployeeReviewId] BIGINT          NOT NULL,
+    [Question]         VARCHAR (MAX)   NULL,
+    [EmployeeScore]    DECIMAL (10, 2) NULL,
+    [EmployeeRemark]   VARCHAR (MAX)   NULL,
+    [SupervisorScore]  DECIMAL (10, 2) NULL,
+    [SupervisorRemark] VARCHAR (MAX)   NULL,
+    PRIMARY KEY CLUSTERED ([Id] ASC)
+);
+
+
+
+CREATE TABLE [dbo].[EmployeeReviewData] (
+    [Id]                     BIGINT          IDENTITY (1, 1) NOT NULL,
+    [ReviewTemplateId]       BIGINT          NOT NULL,
+    [Name]                   VARCHAR (120)   NOT NULL,
+    [Description]            VARCHAR (250)   NULL,
+    [EmployeeId]             BIGINT          NOT NULL,
+    [SupervisorId]           BIGINT          NOT NULL,
+    [EmployeeAverageScore]   DECIMAL (10, 2) NULL,
+    [SupervisorAverageScore] DECIMAL (10, 2) NULL,
+    [Rating]                 VARCHAR (25)    NULL,
+    [ReviewDate]             DATETIME        NOT NULL,
+    [Status]                 VARCHAR (60)    NOT NULL,
+    [DateCreated]            DATETIME        NULL,
+    [CreatedBy]              VARCHAR (120)   NULL,
+    PRIMARY KEY CLUSTERED ([Id] ASC)
+);
+
+CREATE TABLE [dbo].[RatingData] (
+    [Id]               BIGINT          IDENTITY (1, 1) NOT NULL,
+    [ReviewTemplateId] BIGINT          NOT NULL,
+    [RangeFrom]        DECIMAL (10, 2) NOT NULL,
+    [RangeTo]          DECIMAL (10, 2) NOT NULL,
+    [Description]      VARCHAR (25)    NOT NULL,
+    PRIMARY KEY CLUSTERED ([Id] ASC)
+);
+
+CREATE TABLE [dbo].[ReviewTemplateData] (
+    [Id]            BIGINT        IDENTITY (1, 1) NOT NULL,
+    [Name]          VARCHAR (120) NOT NULL,
+    [Description]   VARCHAR (250) NULL,
+    [PointsPerItem] INT           NOT NULL,
+    [Questions]     VARCHAR (MAX) NOT NULL,
+    [CreatedBy]     VARCHAR (120) NULL,
+    [DateCreated]   DATETIME      NOT NULL,
+    PRIMARY KEY CLUSTERED ([Id] ASC)
+);
+
+CREATE TABLE [dbo].[UserInfoData] (
+    [Id]          BIGINT        IDENTITY (1, 1) NOT NULL,
+    [FirstName]   VARCHAR (60)  NOT NULL,
+    [LastName]    VARCHAR (60)  NOT NULL,
+    [MiddleName]  VARCHAR (60)  NULL,
+    [Email]       VARCHAR (120) NOT NULL,
+    [PhoneNumber] VARCHAR (20)  NULL,
+    [DateCreated] DATETIME      NULL,
+    PRIMARY KEY CLUSTERED ([Id] ASC)
+);
+
+CREATE TABLE [dbo].[UserLoginData] (
+    [Id]                  BIGINT        IDENTITY (1, 1) NOT NULL,
+    [UserInfoId]          BIGINT        NOT NULL,
+    [Username]            VARCHAR (120) NOT NULL,
+    [Password]            VARCHAR (120) NOT NULL,
+    [AuthCode]            VARCHAR (250) NULL,
+    [IsAdmin]             BIT           DEFAULT ((1)) NULL,
+    [ExpirationDate]      DATETIME      NULL,
+    [Attempt]             INT           DEFAULT ((0)) NULL,
+    [LastSuccessfulLogin] DATETIME      NULL,
+    PRIMARY KEY CLUSTERED ([Id] ASC)
+);
+
+CREATE PROCEDURE [dbo].[sp_AnswerItemData_add]
+	@EmployeeReviewId bigint,
+	@Question varchar(max),
+	@EmployeeScore decimal(10,2),
+	@EmployeeRemark varchar(max),
+	@SupervisorScore decimal(10,2),
+	@SupervisorRemark varchar(max)
+
+	as
+		
+		insert into dbo.AnswerItemData (EmployeeReviewId,Question,EmployeeScore,EmployeeRemark,SupervisorScore,SupervisorRemark) values (@EmployeeReviewId,@Question,@EmployeeScore,@EmployeeRemark,@SupervisorScore,@SupervisorRemark)
+
+CREATE PROCEDURE [dbo].[sp_AnswerItemData_update]
+	@Id bigint,
+	@EmployeeReviewId bigint,
+	@Question varchar(max),
+	@EmployeeScore decimal(10,2),
+	@EmployeeRemark varchar(max),
+	@SupervisorScore decimal(10,2),
+	@SupervisorRemark varchar(max)
+
+	as
+		
+		update dbo.AnswerItemData set
+
+		EmployeeReviewId=@EmployeeReviewId,
+		Question=@Question,
+		EmployeeScore=@EmployeeScore,
+		EmployeeRemark=@EmployeeRemark,
+		SupervisorScore=@SupervisorScore,
+		SupervisorRemark=@SupervisorRemark
+
+		where Id = @Id
+
+CREATE PROCEDURE [dbo].[sp_EmployeeReviewData_add]
+	@ReviewTemplateId bigint,
+	@Name varchar(120),
+	@Description varchar(250),
+	@EmployeeId bigint,
+	@SupervisorId bigint,
+	@EmployeeAverageScore decimal(10,2),
+	@SupervisorAverageScore decimal(10,2),
+	@Rating varchar(25),
+	@ReviewDate datetime,
+	@Status varchar(60),
+	@DateCreated datetime,
+	@CreatedBy varchar(120)
+
+	as 
+
+	insert into dbo.EmployeeReviewData (ReviewTemplateId,Name,Description,EmployeeId,SupervisorId,EmployeeAverageScore,SupervisorAverageScore,Rating,ReviewDate,Status,DateCreated,CreatedBy) values (@ReviewTemplateId,@Name,@Description,@EmployeeId,@SupervisorId,@EmployeeAverageScore,@SupervisorAverageScore,@Rating,@ReviewDate,@Status,@DateCreated,@CreatedBy)
+
+CREATE PROCEDURE [dbo].[sp_EmployeeReviewData_update]
+	@Id bigint,
+	@ReviewTemplateId bigint,
+	@Name varchar(120),
+	@Description varchar(250),
+	@EmployeeId bigint,
+	@SupervisorId bigint,
+	@EmployeeAverageScore decimal(10,2),
+	@SupervisorAverageScore decimal(10,2),
+	@Rating varchar(25),
+	@ReviewDate datetime,
+	@Status varchar(60),
+	@DateCreated datetime,
+	@CreatedBy varchar(120)
+
+	as 
+
+	update dbo.EmployeeReviewData set
+	
+	ReviewTemplateId=@ReviewTemplateId,
+	Name = @Name,
+	Description= @Description,
+	EmployeeId=@EmployeeId,
+	SupervisorId=@SupervisorId,
+	EmployeeAverageScore=@EmployeeAverageScore,
+	SupervisorAverageScore=@SupervisorAverageScore,
+	Rating=@Rating,
+	ReviewDate=@ReviewDate,
+	Status=@Status,
+	DateCreated=@DateCreated,
+	CreatedBy=@CreatedBy
+
+	where Id = @Id
+
+CREATE PROCEDURE [dbo].[sp_RatingData_add]
+	@ReviewTemplateId bigint,
+	@RangeFrom decimal(10,2),
+	@RangeTo decimal(10,2),
+	@Description varchar(25)
+
+	as
+
+	insert into dbo.RatingData (ReviewTemplateId,RangeFrom,RangeTo,Description) values (@ReviewTemplateId,@RangeFrom,@RangeTo,@Description)
+
+CREATE PROCEDURE [dbo].[sp_RatingData_search]
+	@Score as decimal(10,2),
+	@Id as bigint 
+
+	as
+	select * from dbo.RatingData where ReviewTemplateId = @Id and @Score between RangeFrom and RangeTo
+
+CREATE PROCEDURE [dbo].[sp_RatingData_update]
+@Id bigint,
+	@ReviewTemplateId bigint,
+	@RangeFrom decimal(10,2),
+	@RangeTo decimal(10,2),
+	@Description varchar(25)
+
+	as
+
+	update dbo.RatingData set
+
+	ReviewTemplateId = @ReviewTemplateId,
+	RangeFrom=@RangeFrom,
+	RangeTo=@RangeTo,
+	Description=@Description
+
+	where Id =@Id
+
+CREATE PROCEDURE [dbo].[sp_ReviewTemplateData_add]
+	@Name varchar(120),
+	@Description varchar(250),
+	@PointsPerItem int,
+	@Questions varchar(max),
+	@CreatedBy varchar(120),
+	@DateCreated datetime
+
+	as 
+
+	insert into dbo.ReviewTemplateData ( Name,Description,PointsPerItem,Questions,CreatedBy,DateCreated) values (@Name,@Description,@PointsPerItem,@Questions,@CreatedBy,@DateCreated)
+
+CREATE PROCEDURE [dbo].[sp_ReviewTemplateData_update]
+@Id bigint,
+	@Name varchar(120),
+	@Description varchar(250),
+	@PointsPerItem int,
+	@Questions varchar(max),
+	@CreatedBy varchar(120),
+	@DateCreated datetime
+
+	as 
+
+	update dbo.ReviewTemplateData set
+	Name=@Name,
+	Description=@Description,
+	PointsPerItem=@PointsPerItem,
+	Questions=@Questions,
+	CreatedBy=@CreatedBy,
+	DateCreated=@DateCreated
+
+	where Id =@Id
+
+CREATE PROCEDURE [dbo].[sp_UserInfoData_add]
+	@FirstName varchar(60),
+	@LastName varchar(60),
+	@MiddleName varchar(60),
+	@Email varchar(60),
+	@PhoneNumber varchar(20),
+	@DateCreated datetime
+
+	as 
+		insert into dbo.UserInfoData (FirstName,LastName,MiddleName, Email, PhoneNumber, DateCreated) values (@FirstName,@LastName,@MiddleName,@Email,@PhoneNumber,@DateCreated)
+
+CREATE PROCEDURE [dbo].[sp_UserInfoData_update]
+	@Id bigint,
+	@FirstName varchar(60),
+	@LastName varchar(60),
+	@MiddleName varchar(60),
+	@Email varchar(60),
+	@PhoneNumber varchar(20),
+	@DateCreated datetime
+
+	as 
+		update dbo.UserInfoData set
+
+		FirstName = @FirstName,
+		LastName =@LastName,
+		MiddleName = @MiddleName,
+		Email =@Email,
+		PhoneNumber =@PhoneNumber,
+		DateCreated = @DateCreated
+
+		where Id = Id
+
+CREATE PROCEDURE [dbo].[sp_UserLoginData_add]
+	@UserInfoId bigint,
+	@Username varchar(120),
+	@Password varchar(120),
+	@AuthCode varchar(250),
+	@IsAdmin bit,
+	@ExpirationDate datetime,
+	@Attempt int,
+	@LastSuccessfulLogin datetime
+
+	as
+		insert into dbo.UserLoginData (UserInfoId, Username, Password, AuthCode,IsAdmin, ExpirationDate,Attempt,LastSuccessfulLogin) values (@UserInfoId,@Username,@Password,@AuthCode,@IsAdmin,@ExpirationDate,@Attempt,@LastSuccessfulLogin)
+
+CREATE PROCEDURE [dbo].[sp_UserLoginData_update]
+	@Id bigint,
+	@UserInfoId bigint,
+	@Username varchar(120),
+	@Password varchar(120),
+	@AuthCode varchar(250),
+	@IsAdmin bit,
+	@ExpirationDate datetime,
+	@Attempt int,
+	@LastSuccessfulLogin datetime
+
+	as
+		update dbo.UserLoginData set
+		UserInfoId =@UserInfoId,
+		Username = @Username,
+		Password=@Password,
+		AuthCode = @AuthCode,
+		IsAdmin = @IsAdmin,
+		ExpirationDate =@ExpirationDate,
+		Attempt=@Attempt,
+		LastSuccessfulLogin=@LastSuccessfulLogin
+
+		where Id = @Id
